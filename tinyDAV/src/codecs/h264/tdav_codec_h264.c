@@ -51,6 +51,8 @@
 #   endif
 #endif
 
+#define CodecID AVCodecID
+
 typedef struct tdav_codec_h264_s {
     TDAV_DECLARE_CODEC_H264_COMMON;
 
@@ -680,15 +682,9 @@ int tdav_codec_h264_open_encoder(tdav_codec_h264_t* self)
         return -1;
     }
 
-#if (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 35, 0))
     if((self->encoder.context = avcodec_alloc_context3(self->encoder.codec))) {
         avcodec_get_context_defaults3(self->encoder.context, self->encoder.codec);
     }
-#else
-    if((self->encoder.context = avcodec_alloc_context())) {
-        avcodec_get_context_defaults(self->encoder.context);
-    }
-#endif
 
     if(!self->encoder.context) {
         TSK_DEBUG_ERROR("Failed to allocate context");
@@ -794,7 +790,7 @@ int tdav_codec_h264_open_encoder(tdav_codec_h264_t* self)
     }
 
     // Open encoder
-    if((ret = avcodec_open(self->encoder.context, self->encoder.codec)) < 0) {
+    if((ret = avcodec_open2(self->encoder.context, self->encoder.codec, 0)) < 0) {
         TSK_DEBUG_ERROR("Failed to open [%s] codec", TMEDIA_CODEC(self)->plugin->desc);
         return ret;
     }
@@ -847,8 +843,8 @@ int tdav_codec_h264_open_decoder(tdav_codec_h264_t* self)
         return -1;
     }
 
-    self->decoder.context = avcodec_alloc_context();
-    avcodec_get_context_defaults(self->decoder.context);
+    self->decoder.context = avcodec_alloc_context3(self->decoder.codec);
+    avcodec_get_context_defaults3(self->decoder.context, self->decoder.codec);
 
     self->decoder.context->pix_fmt = PIX_FMT_YUV420P;
     self->decoder.context->flags2 |= CODEC_FLAG2_FAST;
@@ -863,7 +859,7 @@ int tdav_codec_h264_open_decoder(tdav_codec_h264_t* self)
     avcodec_get_frame_defaults(self->decoder.picture);
 
     // Open decoder
-    if((ret = avcodec_open(self->decoder.context, self->decoder.codec)) < 0) {
+    if((ret = avcodec_open2(self->decoder.context, self->decoder.codec, 0)) < 0) {
         TSK_DEBUG_ERROR("Failed to open [%s] codec", TMEDIA_CODEC(self)->plugin->desc);
         return ret;
     }

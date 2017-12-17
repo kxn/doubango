@@ -434,7 +434,7 @@ tsk_size_t tdav_codec_theora_decode(tmedia_codec_t* self, const void* in_data, t
 
                                 theora->decoder.context->extradata_size = extradata_size;
 
-                                if((ret = avcodec_open(theora->decoder.context, theora->decoder.codec)) == 0) {
+                                if((ret = avcodec_open2(theora->decoder.context, theora->decoder.codec, 0)) == 0) {
                                     theora->decoder.opened = tsk_true;
                                 }
                                 else {
@@ -599,8 +599,8 @@ int tdav_codec_theora_open_encoder(tdav_codec_theora_t* self)
         TSK_DEBUG_ERROR("Encoder already initialized");
         return -1;
     }
-    self->encoder.context = avcodec_alloc_context();
-    avcodec_get_context_defaults(self->encoder.context);
+    self->encoder.context = avcodec_alloc_context3(self->encoder.codec);
+    avcodec_get_context_defaults3(self->encoder.context, self->encoder.codec);
 
     self->encoder.context->pix_fmt		= PIX_FMT_YUV420P;
     self->encoder.context->time_base.num  = 1;
@@ -640,7 +640,7 @@ int tdav_codec_theora_open_encoder(tdav_codec_theora_t* self)
     }
 
     // Open encoder
-    if((ret = avcodec_open(self->encoder.context, self->encoder.codec)) < 0) {
+    if((ret = avcodec_open2(self->encoder.context, self->encoder.codec, 0)) < 0) {
         TSK_DEBUG_ERROR("Failed to open Theora encoder");
         return ret;
     }
@@ -664,8 +664,8 @@ int tdav_codec_theora_open_decoder(tdav_codec_theora_t* self)
         TSK_DEBUG_ERROR("Decoder already opened");
         return -1;
     }
-    self->decoder.context = avcodec_alloc_context();
-    avcodec_get_context_defaults(self->decoder.context);
+    self->decoder.context = avcodec_alloc_context3(self->decoder.codec);
+    avcodec_get_context_defaults3(self->decoder.context,self->decoder.codec);
 
     self->decoder.context->pix_fmt = PIX_FMT_YUV420P;
     self->decoder.context->width = TMEDIA_CODEC_VIDEO(self)->in.width;

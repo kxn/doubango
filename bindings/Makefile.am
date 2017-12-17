@@ -125,5 +125,10 @@ if TARGET_OS_IS_ANDROID
 libtinyWRAP_la_SOURCES  +=  java/android/tinyWRAP_wrap.cxx
 endif
 
+
+_includedir = $(includedir)/tinywrap
+_include_HEADERS = _common/*.h
+
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tinyWRAP.pc
